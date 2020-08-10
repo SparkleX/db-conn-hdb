@@ -2,12 +2,6 @@ import { HdbConnection } from "../HdbConnection";
 import { SqlError, Connection } from "db-conn";
 import { HdbConnectionConfig } from "../HdbConnectionConfig";
 import { HdbDriver } from "../HdbDriver";
-/*var mockORDRRepositorygetByKey = jest.fn();
-var mockORDRRepository = {
-    findByKey : mockORDRRepositorygetByKey
-}*/
-
-//container.rebind(ORDRRepository).toConstantValue(mockORDRRepository as any);
 
 const driver = new  HdbDriver();
 
@@ -28,21 +22,10 @@ test("Failed connection", async () => {
 	}catch(e) {
 		expect(e instanceof SqlError).toBe(true);
 	}
-	
-   /* mockORDRRepositorygetByKey.mockReturnValueOnce({DocEntry: 1});
-
-    var service: ORDRService = container.get(ORDRService);
-    var rt: ORDR = await service.getById( {DocEntry: 1} );
-    expect(rt).toStrictEqual({DocEntry: 1});
-    
-    expect(mockORDRRepositorygetByKey.mock.calls.length).toBe(1);
-    expect(mockORDRRepositorygetByKey.mock.calls[0][0]).toStrictEqual({DocEntry: 1});*/
 });
 
-
-
 test("Connect", async () => {
-	
+
 	const conn: Connection = await driver.connect(config);
 	let rt = await conn.execute("set schema i031684");
 	expect(rt).toStrictEqual({});
@@ -89,10 +72,38 @@ test("commit", async () => {
 	await conn.commit();
 	await conn.close();
 });
-
+test("commit failed", async () => {
+	const conn: Connection = await driver.connect(config);
+	(conn as any).client.end();
+	try {
+		await conn.commit();
+	}catch(e) {
+		expect(e instanceof SqlError).toBe(true);
+	}
+});
 test("rollback", async () => {
 	const conn: Connection = await driver.connect(config);
+	try {
+		await conn.execute(`drop table TEST_ROLLBACK`);
+	}catch (e) {
+		console.debug(e);
+	}
+	await conn.execute(`create table TEST_ROLLBACK( "ID" INTEGER not null,primary key ("ID"))`);
 	await conn.setAutoCommit(false);
+	await conn.execute(`insert into TEST_ROLLBACK("ID") values(1)`);
 	await conn.rollback();
+	const rt = await conn.execute(`select * from TEST_ROLLBACK`);
+	expect(rt.data?.length).toBe(0);
 	await conn.close();
+});
+
+
+test("rollback failed", async () => {
+	const conn: Connection = await driver.connect(config);
+	(conn as any).client.end();
+	try {
+		await conn.rollback();
+	}catch(e) {
+		expect(e instanceof SqlError).toBe(true);
+	}
 });

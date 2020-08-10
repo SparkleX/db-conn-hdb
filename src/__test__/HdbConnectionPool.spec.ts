@@ -13,12 +13,12 @@ const poolConfig: HdbPoolConfig = {
     max: 5
 }
 
-test("Failed connection", async () => {
+test("connection pool", async () => {
 	const pool: ConnectionPool = new HdbConnectionPool(config, poolConfig);
 	const conn1 = await pool.getConnection();
 	const conn2 = await pool.getConnection();
 	conn1.close();
 	conn2.close();
-	console.debug((pool as any).pool._pool.poolSize);
+	pool.close();
 	expect((pool as any).pool._pool.availableResourceList.length).toStrictEqual(2);	
 });

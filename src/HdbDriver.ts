@@ -1,9 +1,9 @@
 import { Driver, Connection, SqlError } from "db-conn";
-import { HdbConnection } from ".";
+import { HdbConnection, HdbConnectionConfig } from ".";
 const hdb  = require("hdb");
 
 export class HdbDriver implements Driver {
-	connect(config: any): Promise<Connection> {
+	connect(config: HdbConnectionConfig): Promise<Connection> {
 		const client = hdb.createClient(config);
 		return new Promise((resolve, reject) => {
 			client.on('error', function (err: any) {

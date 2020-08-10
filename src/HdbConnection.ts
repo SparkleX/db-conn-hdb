@@ -1,10 +1,9 @@
 import { Connection, SqlError, Result } from "db-conn";
 import { HdbConnectionConfig } from "./HdbConnectionConfig";
+import { HdbSqlError } from "./HdbSqlError";
 const hdb  = require("hdb");
 
 export class HdbConnection implements Connection {
-
-	//private config: object;
 	private client: any;
 	private pool: any;
 	public constructor(client: any, pool?: any) {
@@ -12,21 +11,14 @@ export class HdbConnection implements Connection {
 		this.pool = pool;
 	}
 	public async close(): Promise<void> {
-		if(this.pool) {
-			await this.pool.release(this.client);
-		}
-		else {
-			this.client.end();
-		}
 		this.client.end();
 		delete this.client;
 	}
 	public async execute(sql: string, params?: object | any[] | undefined): Promise<Result> {
-		//await this.ensureConnect();
 		return new Promise((resolve, reject) => {
 		this.client.exec(sql, function(err: any, rows: any) {
 			if (err) {
-				reject(new SqlError("exec error", err));
+				reject(new HdbSqlError("exec error", err));
 				return;
 			}
 			const rt : Result = {};
@@ -43,12 +35,11 @@ export class HdbConnection implements Connection {
 	public async executeQuery(sql: string, params?: object | any[] | undefined): Promise<object[]> {
 		const rt: Result = await this.execute(sql, params);
 		if(rt.data === undefined) {
-			throw new SqlError("No data returned");
+			throw new HdbSqlError("No data returned");
 		}
 		return rt.data;
 	}
 	public async setAutoCommit(autoCommit: boolean): Promise<void> {
-		//await this.ensureConnect();
 		this.client.setAutoCommit(autoCommit);
 	}
 	public async commit(): Promise<void> {
@@ -56,7 +47,7 @@ export class HdbConnection implements Connection {
 		return new Promise((resolve, reject) => {
 			that.client.commit(function(err: any){
 				if(err) {
-					reject(new SqlError(err.message));
+					reject(new HdbSqlError("commit failed", err));
 					return;
 				}
 				resolve();
@@ -68,7 +59,7 @@ export class HdbConnection implements Connection {
 		return new Promise((resolve, reject) => {
 			that.client.rollback(function(err: any){
 				if(err) {
-					reject();
+					reject(new HdbSqlError("rollback failed", err));
 					return;
 				}
 				resolve();

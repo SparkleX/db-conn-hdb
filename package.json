@@ -10,8 +10,8 @@
     "type": "git",
     "url": "git+https://github.com/SparkleX/db-conn-hdb.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Sun, Xufei",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/SparkleX/db-conn-hdb/issues"
   },
