@@ -107,3 +107,43 @@ test("rollback failed", async () => {
 		expect(e instanceof SqlError).toBe(true);
 	}
 });
+
+
+test("Params", async () => {
+	const conn: Connection = await driver.connect(config);
+	let rt = await conn.execute("set schema i031684");
+	expect(rt).toStrictEqual({});
+	try {
+		rt = await conn.execute(`drop table "TEST"`);
+	}catch (e) {
+		console.debug(e);
+	}
+	rt = await conn.execute(`create table TEST(ID INTEGER not null,primary key (ID))`);
+	expect(rt).toStrictEqual({});
+	rt = await conn.execute(`insert into TEST(ID) values(?)`,[1]);
+	expect(rt).toStrictEqual({affectedRows:1});
+
+	const data = await conn.executeQuery(`select * from "TEST"`);
+	expect(data).toStrictEqual([{ID:1}]);
+
+	await conn.close();
+});
+
+test("fail exec params", async () => {
+	const conn: Connection = await driver.connect(config);
+	let rt = await conn.execute("set schema i031684");
+	expect(rt).toStrictEqual({});
+	try {
+		rt = await conn.execute(`drop table "TEST"`);
+	}catch (e) {
+		console.debug(e);
+	}
+	rt = await conn.execute(`create table TEST(ID INTEGER not null,primary key (ID))`);
+	expect(rt).toStrictEqual({});
+	try {
+		rt = await conn.execute(`insert into TEST(ID) values(?)`);
+	}catch (e) {
+		expect(e instanceof SqlError).toBe(true);
+	}
+	await conn.close();
+});

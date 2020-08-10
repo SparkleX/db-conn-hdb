@@ -15,21 +15,37 @@ export class HdbConnection implements Connection {
 		delete this.client;
 	}
 	public async execute(sql: string, params?: object | any[] | undefined): Promise<Result> {
+		if (params === undefined) {
+			params = [];
+		}
 		return new Promise((resolve, reject) => {
-		this.client.exec(sql, function(err: any, rows: any) {
-			if (err) {
-				reject(new HdbSqlError("exec error", err));
-				return;
-			}
-			const rt : Result = {};
-			if(isNaN(rows) == false) {
-				rt.affectedRows = rows;
-			}
-			if(Array.isArray(rows)) {
-				rt.data = rows;
-			}
-			resolve(rt);
-		  });
+			this.client.prepare(sql, function (err: any, statement: any){
+				if (err) {
+					reject(new HdbSqlError("statement prepare error", err));
+					return;
+				}
+				statement.exec(params, function (err: any, rows: any) {
+					if (err) {
+						reject(new HdbSqlError("statement exec error", err));
+						return;
+					}
+					const rt : Result = {};
+					if(isNaN(rows) == false) {
+						rt.affectedRows = rows;
+					}
+					if(Array.isArray(rows)) {
+						rt.data = rows;
+					}
+					statement.drop(function(err: any){
+						/* istanbul ignore next */
+						if (err) {
+							reject(new HdbSqlError("statement drop error", err));
+							return;
+						}
+						resolve(rt);
+					});					
+				});
+			});
 		});
 	}
 	public async executeQuery(sql: string, params?: object | any[] | undefined): Promise<object[]> {
