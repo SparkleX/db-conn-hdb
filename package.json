@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/SparkleX/db-conn-hdb#readme",
   "dependencies": {
-    "hdb": "^0.18.1"
+    "hdb": "^0.18.1",
+    "hdb-pool": "^0.1.6"
   },
   "keywords": [
     "db-conn",

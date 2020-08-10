@@ -1,7 +1,7 @@
-import { ConnectionHdb } from "../ConnectionHdb";
+import { HdbConnection } from "../HdbConnection";
 import { SqlError, Connection } from "db-conn";
-import { ConnectionConfigHdb } from "../ConnectionConfig";
-
+import { HdbConnectionConfig } from "../HdbConnectionConfig";
+import { HdbDriver } from "../HdbDriver";
 /*var mockORDRRepositorygetByKey = jest.fn();
 var mockORDRRepository = {
     findByKey : mockORDRRepositorygetByKey
@@ -9,8 +9,9 @@ var mockORDRRepository = {
 
 //container.rebind(ORDRRepository).toConstantValue(mockORDRRepository as any);
 
+const driver = new  HdbDriver();
 
-const config: ConnectionConfigHdb = {
+const config: HdbConnectionConfig = {
 	host:"10.58.81.71",
 	port: 30013,
 	user: "system",
@@ -21,9 +22,9 @@ const config: ConnectionConfigHdb = {
 test("Failed connection", async () => {
 	const c = Object.assign({}, config);
 	c.password = "1111";
-	const conn: ConnectionHdb = new ConnectionHdb(c);
+	
 	try {
-		const rt = await conn.execute("set schema i031684");
+		const conn: Connection = await driver.connect(c);
 	}catch(e) {
 		expect(e instanceof SqlError).toBe(true);
 	}
@@ -42,7 +43,7 @@ test("Failed connection", async () => {
 
 test("Connect", async () => {
 	
-	const conn: Connection = new ConnectionHdb(config);
+	const conn: Connection = await driver.connect(config);
 	let rt = await conn.execute("set schema i031684");
 	expect(rt).toStrictEqual({});
 	try {
@@ -63,7 +64,7 @@ test("Connect", async () => {
 
 
 test("Faied execute", async () => {
-	const conn: Connection = new ConnectionHdb(config);
+	const conn: Connection = await driver.connect(config);
 	try {
 		let rt = await conn.execute("hello");
 	}catch(e) {
@@ -73,7 +74,7 @@ test("Faied execute", async () => {
 });
 
 test("Faied execute query", async () => {
-	const conn: Connection = new ConnectionHdb(config);
+	const conn: Connection = await driver.connect(config);
 	try {
 		let rt = await conn.executeQuery("set schema i031684");
 	}catch(e) {
@@ -83,14 +84,14 @@ test("Faied execute query", async () => {
 });
 
 test("commit", async () => {
-	const conn: Connection = new ConnectionHdb(config);
+	const conn: Connection = await driver.connect(config);
 	await conn.setAutoCommit(false);
 	await conn.commit();
 	await conn.close();
 });
 
 test("rollback", async () => {
-	const conn: Connection = new ConnectionHdb(config);
+	const conn: Connection = await driver.connect(config);
 	await conn.setAutoCommit(false);
 	await conn.rollback();
 	await conn.close();

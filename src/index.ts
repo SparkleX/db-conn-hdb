@@ -1,3 +1,4 @@
-export * from "./ConnectionConfig";
-export * from "./ConnectionHdb";
-export * from "./ConnectionPoolHdb";
+export * from "./HdbConnectionConfig";
+export * from "./HdbConnection";
+export * from "./HdbConnectionPool";
+export * from "./HdbPoolConfig"

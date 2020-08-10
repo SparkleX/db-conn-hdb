@@ -1,4 +1,4 @@
-export interface ConnectionConfigHdb {
+export interface HdbConnectionConfig {
 	host?     : string,
 	port?     : number,
 	user?     : string,

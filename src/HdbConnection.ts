@@ -1,40 +1,28 @@
 import { Connection, SqlError, Result } from "db-conn";
-import { ConnectionConfigHdb } from "./ConnectionConfig";
+import { HdbConnectionConfig } from "./HdbConnectionConfig";
 const hdb  = require("hdb");
 
-export class ConnectionHdb implements Connection {
+export class HdbConnection implements Connection {
 
-	private config: object;
+	//private config: object;
 	private client: any;
-	public constructor(config: ConnectionConfigHdb) {
-		this.config = config;
-	}
-
-	private async ensureConnect():Promise<void> {
-		if(this.client) {
-			return;
-		}
-		this.client = hdb.createClient(this.config);
-		return new Promise((resolve, reject) => {
-			this.client.on('error', function (err: any) {
-				reject(new SqlError("hdb error", err));
-				return ;
-			});
-			this.client.connect(function (err: any) {
-				if (err) {
-					reject(new SqlError("hdb connect failed", err));
-					return;
-				}
-				resolve();
-			});
-		});
+	private pool: any;
+	public constructor(client: any, pool?: any) {
+		this.client = client;
+		this.pool = pool;
 	}
 	public async close(): Promise<void> {
+		if(this.pool) {
+			await this.pool.release(this.client);
+		}
+		else {
+			this.client.end();
+		}
 		this.client.end();
 		delete this.client;
 	}
 	public async execute(sql: string, params?: object | any[] | undefined): Promise<Result> {
-		await this.ensureConnect();
+		//await this.ensureConnect();
 		return new Promise((resolve, reject) => {
 		this.client.exec(sql, function(err: any, rows: any) {
 			if (err) {
@@ -60,7 +48,7 @@ export class ConnectionHdb implements Connection {
 		return rt.data;
 	}
 	public async setAutoCommit(autoCommit: boolean): Promise<void> {
-		await this.ensureConnect();
+		//await this.ensureConnect();
 		this.client.setAutoCommit(autoCommit);
 	}
 	public async commit(): Promise<void> {
