@@ -7,11 +7,11 @@ import { readBuilderProgram } from "typescript";
 const driver = new  HdbDriver();
 
 const config: HdbConnectionConfig = {
-	host:"10.58.81.71",
+	host:"1.1.1.10",
 	port: 30013,
 	user: "system",
-	password: "Initial0",
-	databaseName: "ANA"
+	password: "********",
+	databaseName: "DBA"
 }
 
 test("Failed connection", async () => {
