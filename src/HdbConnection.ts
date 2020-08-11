@@ -1,6 +1,6 @@
-import { Connection, SqlError, Result } from "db-conn";
+import { Connection, SQLException, Result } from "db-conn";
 import { HdbConnectionConfig } from "./HdbConnectionConfig";
-import { HdbSqlError } from "./HdbSqlError";
+import { HdbSQLException } from "./HdbSQLException";
 const hdb  = require("hdb");
 
 export class HdbConnection implements Connection {
@@ -21,12 +21,12 @@ export class HdbConnection implements Connection {
 		return new Promise((resolve, reject) => {
 			this.client.prepare(sql, function (err: any, statement: any){
 				if (err) {
-					reject(new HdbSqlError("statement prepare error", err));
+					reject(new HdbSQLException("statement prepare error", err));
 					return;
 				}
 				statement.exec(params, function (err: any, rows: any) {
 					if (err) {
-						reject(new HdbSqlError("statement exec error", err));
+						reject(new HdbSQLException("statement exec error", err));
 						return;
 					}
 					const rt : Result = {};
@@ -39,7 +39,7 @@ export class HdbConnection implements Connection {
 					statement.drop(function(err: any){
 						/* istanbul ignore next */
 						if (err) {
-							reject(new HdbSqlError("statement drop error", err));
+							reject(new HdbSQLException("statement drop error", err));
 							return;
 						}
 						resolve(rt);
@@ -51,7 +51,7 @@ export class HdbConnection implements Connection {
 	public async executeQuery(sql: string, params?: object | any[] | undefined): Promise<object[]> {
 		const rt: Result = await this.execute(sql, params);
 		if(rt.data === undefined) {
-			throw new HdbSqlError("No data returned");
+			throw new HdbSQLException("No data returned");
 		}
 		return rt.data;
 	}
@@ -63,7 +63,7 @@ export class HdbConnection implements Connection {
 		return new Promise((resolve, reject) => {
 			that.client.commit(function(err: any){
 				if(err) {
-					reject(new HdbSqlError("commit failed", err));
+					reject(new HdbSQLException("commit failed", err));
 					return;
 				}
 				resolve();
@@ -75,7 +75,7 @@ export class HdbConnection implements Connection {
 		return new Promise((resolve, reject) => {
 			that.client.rollback(function(err: any){
 				if(err) {
-					reject(new HdbSqlError("rollback failed", err));
+					reject(new HdbSQLException("rollback failed", err));
 					return;
 				}
 				resolve();

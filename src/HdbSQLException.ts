@@ -1,6 +1,6 @@
-import { SqlError } from "db-conn";
+import { SQLException } from "db-conn";
 
-export class HdbSqlError extends SqlError {
+export class HdbSQLException extends SQLException {
 	public constructor(message: string, source?: any) {
 		super(`${message}: ${source?.message}`);
 	}
