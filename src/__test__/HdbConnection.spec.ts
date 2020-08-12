@@ -2,29 +2,10 @@ import { HdbConnection } from "../HdbConnection";
 import { SQLException, Connection } from "db-conn";
 import { HdbConnectionConfig } from "../HdbConnectionConfig";
 import { HdbDriver } from "../HdbDriver";
-import { readBuilderProgram } from "typescript";
-
+import * as jsonfile from "jsonfile"
 const driver = new  HdbDriver();
 
-const config: HdbConnectionConfig = {
-	host:"1.1.1.10",
-	port: 30013,
-	user: "system",
-	password: "********",
-	databaseName: "DBA"
-}
-
-test("Failed connection", async () => {
-	const c = Object.assign({}, config);
-	c.password = "1111";
-	
-	try {
-		const conn: Connection = await driver.connect(c);
-	}catch(e) {
-		expect(e instanceof SQLException).toBe(true);
-	}
-});
-
+const config: HdbConnectionConfig = jsonfile.readFileSync("config/test.json");
 
 async function rebuild(conn: Connection) {
 	try {
@@ -39,16 +20,27 @@ async function rebuild(conn: Connection) {
 	}	
 }
 
+test("Failed connection", async () => {
+	const c = Object.assign({}, config);
+	c.password = "1111";
+	
+	try {
+		const conn: Connection = await driver.connect(c);
+	}catch(e) {
+		expect(e instanceof SQLException).toBe(true);
+	}
+});
+
 test("Connect", async () => {
 	const conn: Connection = await driver.connect(config);
 	await rebuild(conn);
-	let rt = await conn.execute(`create table "TEST"( "ID" INTEGER not null,primary key ("ID"))`);
+	let rt = await conn.execute(`create table TEST( ID INTEGER not null, CTEXT text,primary key ("ID"))`);
 	expect(rt).toStrictEqual({});
-	rt = await conn.execute(`insert into "TEST"("ID") values(1)`);
+	rt = await conn.execute(`insert into TEST(ID, CTEXT) values(1, 'text')`);
 	expect(rt).toStrictEqual({affectedRows:1});
 
 	const data = await conn.executeQuery(`select * from "TEST"`);
-	expect(data).toStrictEqual([{ID:1}]);
+	expect(data).toStrictEqual([{ID:1, CTEXT:"text"}]);
 
 	await conn.close();
 });

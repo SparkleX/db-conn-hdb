@@ -1,0 +1,7 @@
+{
+	"host":"1.1.1.10",
+	"port": 30013,
+	"databaseName": "DBA",
+	"user": "system",
+	"password": "********"
+}

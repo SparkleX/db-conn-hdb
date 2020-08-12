@@ -1,14 +1,12 @@
 import { Connection, SQLException, Result } from "db-conn";
-import { HdbConnectionConfig } from "./HdbConnectionConfig";
 import { HdbSQLException } from "./HdbSQLException";
+import { Buffer } from "buffer";
 const hdb  = require("hdb");
 
 export class HdbConnection implements Connection {
 	private client: any;
-	private pool: any;
-	public constructor(client: any, pool?: any) {
+	public constructor(client: any) {
 		this.client = client;
-		this.pool = pool;
 	}
 	public async close(): Promise<void> {
 		this.client.end();
@@ -35,6 +33,17 @@ export class HdbConnection implements Connection {
 					}
 					if(Array.isArray(rows)) {
 						rt.data = rows;
+						for(const index in rt.data) {
+							const obj: any = rt.data[index];
+							for(const name in obj) {
+								const value = obj[name];
+								if (Buffer.isBuffer(value) == false) {
+									continue;
+								}
+								const buf = value as Buffer;
+								obj[name] = buf.toString() as any;
+							}
+						}
 					}
 					statement.drop(function(err: any){
 						/* istanbul ignore next */

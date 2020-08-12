@@ -3,3 +3,4 @@ test/
 .nyc_output/
 .vscode/
 __test__/
+config/test.json
