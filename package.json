@@ -1,6 +1,6 @@
 {
   "name": "db-conn-hdb",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Database Connecton and Pool implementation for SAP HANA hdb",
   "main": "dist/index.js",
   "scripts": {
