@@ -40,8 +40,7 @@ export class HdbConnection implements Connection {
 								if (Buffer.isBuffer(value) == false) {
 									continue;
 								}
-								const buf = value as Buffer;
-								obj[name] = buf.toString() as any;
+								obj[name] = (value as Buffer).toString();
 							}
 						}
 					}
