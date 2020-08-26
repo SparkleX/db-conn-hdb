@@ -32,3 +32,7 @@ await conn1.close();
 await conn2.close();
 await pool.close();
 ```
+
+# History
+## 1.2.0
+1) SQLException removed

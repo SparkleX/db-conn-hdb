@@ -1,8 +1,9 @@
 import { HdbConnection } from "../HdbConnection";
-import { SQLException, Connection } from "db-conn";
+import { Connection } from "db-conn";
 import { HdbConnectionConfig } from "../HdbConnectionConfig";
 import { HdbDriver } from "../HdbDriver";
 import * as jsonfile from "jsonfile"
+import { exception } from "console";
 const driver = new  HdbDriver();
 
 const config: HdbConnectionConfig = jsonfile.readFileSync("config/test.json");
@@ -21,13 +22,14 @@ async function rebuild(conn: Connection) {
 }
 
 test("Failed connection", async () => {
+	expect.assertions(2);
 	const c = Object.assign({}, config);
 	c.password = "1111";
-	
 	try {
 		const conn: Connection = await driver.connect(c);
 	}catch(e) {
-		expect(e instanceof SQLException).toBe(true);
+		expect(e.code).toBe(10);
+		expect(e.message).toBe("authentication failed");
 	}
 });
 
@@ -50,8 +52,10 @@ test("Faied execute", async () => {
 	const conn: Connection = await driver.connect(config);
 	try {
 		let rt = await conn.execute("hello");
+		fail("never here");
 	}catch(e) {
-		expect(e instanceof SQLException).toBe(true);
+		expect(e.code).toBe(257);
+		expect(e.message.startsWith("sql syntax error:")).toBeTruthy();
 	}
 	await conn.close();
 });
@@ -60,8 +64,9 @@ test("Faied execute query", async () => {
 	const conn: Connection = await driver.connect(config);
 	try {
 		let rt = await conn.executeQuery("set schema testhdb");
+		fail("never here");
 	}catch(e) {
-		expect(e instanceof SQLException).toBe(true);
+		expect(e.message).toBe("No data returned");
 	}
 	await conn.close();
 });
@@ -77,8 +82,8 @@ test("commit failed", async () => {
 	(conn as any).client.end();
 	try {
 		await conn.commit();
+		fail("never here");
 	}catch(e) {
-		expect(e instanceof SQLException).toBe(true);
 	}
 });
 test("rollback", async () => {
@@ -99,8 +104,8 @@ test("rollback failed", async () => {
 	(conn as any).client.end();
 	try {
 		await conn.rollback();
+		fail("never here");
 	}catch(e) {
-		expect(e instanceof SQLException).toBe(true);
 	}
 });
 
@@ -126,8 +131,8 @@ test("fail exec params", async () => {
 	expect(rt).toStrictEqual({});
 	try {
 		rt = await conn.execute(`insert into TEST(ID) values(?)`);
+		fail("never here");
 	}catch (e) {
-		expect(e instanceof SQLException).toBe(true);
 	}
 	await conn.close();
 });
