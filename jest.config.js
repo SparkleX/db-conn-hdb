@@ -2,6 +2,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   collectCoverage: true,
+  maxWorkers: 1,
   coverageDirectory: "coverage",
   coverageReporters: ["lcov", "text"],
   coverageThreshold: {

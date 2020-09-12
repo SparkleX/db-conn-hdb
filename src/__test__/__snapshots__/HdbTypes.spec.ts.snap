@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Decimal: data 1`] = `
+Array [
+  Object {
+    "AMOUNT": "1234567890123.123456",
+    "CTEXT": null,
+    "ID": 1,
+    "TIMES": "2007-02-28T12:45:12.234",
+  },
+]
+`;
+
+exports[`Decimal: metadata 1`] = `
+Array [
+  Object {
+    "columnName": "ID",
+    "columnType": 1,
+  },
+  Object {
+    "columnName": "CTEXT",
+    "columnType": 2,
+  },
+  Object {
+    "columnName": "AMOUNT",
+    "columnType": 3,
+  },
+  Object {
+    "columnName": "TIMES",
+    "columnType": 12,
+  },
+]
+`;

@@ -1,5 +1,6 @@
-import { Connection, Result } from "db-conn";
+import { Connection, Result, ResultSetMetaData, ResultSetColumnMetadata, ColumnType} from "db-conn";
 import { Buffer } from "buffer";
+import { HdbColumnType } from "./HdbColumnType";
 const hdb  = require("hdb");
 
 export class HdbConnection implements Connection {
@@ -11,7 +12,40 @@ export class HdbConnection implements Connection {
 		this.client.end();
 		delete this.client;
 	}
+	private convertColumnMetaData (colMeta: any): ResultSetColumnMetadata {
+		let rt: ResultSetColumnMetadata = {};
+		rt.columnName = colMeta.columnName;
+		switch(colMeta.dataType) {
+			case HdbColumnType.INTEGER :
+				rt.columnType = ColumnType.INTEGER;
+				break;
+			case HdbColumnType.NVARCHAR :
+				rt.columnType = ColumnType.NVARCHAR;
+				break;
+			case HdbColumnType.DECIMAL :
+				rt.columnType = ColumnType.DECIMAL;
+				break;
+			case HdbColumnType.TIMESTAMP :
+				rt.columnType = ColumnType.TIMESTAMP;
+				break;
+			//default:
+				//throw Error(`undefined column type ${colMeta.dataType}`)
+		}
+		return rt;
+	}
+
+	private convertResultSetMetaData (statement: any): ResultSetMetaData {
+		const rt:ResultSetMetaData = [];
+		for (let i in statement.resultSetMetadata) {
+			const srcColMeta = statement.resultSetMetadata[i];
+			const tgtColMeta = this.convertColumnMetaData(srcColMeta);
+			rt.push(tgtColMeta);
+		}
+		return rt;
+
+	}
 	public async execute(sql: string, params?: object | any[] | undefined): Promise<Result> {
+		const thisConn = this;
 		if (params === undefined) {
 			params = [];
 		}
@@ -32,6 +66,7 @@ export class HdbConnection implements Connection {
 					}
 					if(Array.isArray(rows)) {
 						rt.data = rows;
+						rt.metadata = thisConn.convertResultSetMetaData(statement);
 						for(const index in rt.data) {
 							const obj: any = rt.data[index];
 							for(const name in obj) {
