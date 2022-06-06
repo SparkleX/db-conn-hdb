@@ -1,4 +1,4 @@
-import { Connection, Result, ResultSetMetaData, ResultSetColumnMetadata, ColumnType} from "db-conn";
+import { Connection, Result, ResultSetMetaData, ResultSetColumnMetadata, SqlType} from "db-conn";
 import { Buffer } from "buffer";
 import { HdbColumnType } from "./HdbColumnType";
 const hdb  = require("hdb");
@@ -14,19 +14,19 @@ export class HdbConnection implements Connection {
 	}
 	private convertColumnMetaData (colMeta: any): ResultSetColumnMetadata {
 		let rt: ResultSetColumnMetadata = {};
-		rt.columnName = colMeta.columnName;
+		rt.name = colMeta.columnName;
 		switch(colMeta.dataType) {
 			case HdbColumnType.INTEGER :
-				rt.columnType = ColumnType.INTEGER;
+				rt.type = SqlType.integer;
 				break;
 			case HdbColumnType.NVARCHAR :
-				rt.columnType = ColumnType.NVARCHAR;
+				rt.type = SqlType.varchar;
 				break;
 			case HdbColumnType.DECIMAL :
-				rt.columnType = ColumnType.DECIMAL;
+				rt.type = SqlType.decimal;
 				break;
 			case HdbColumnType.TIMESTAMP :
-				rt.columnType = ColumnType.TIMESTAMP;
+				rt.type = SqlType.timestamp;
 				break;
 			//default:
 				//throw Error(`undefined column type ${colMeta.dataType}`)

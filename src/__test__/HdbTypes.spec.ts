@@ -35,3 +35,27 @@ test("Decimal", async () => {
 	await conn.close();
 });
 
+test("types", async () => {
+	const conn: Connection = await driver.connect(config);
+	await rebuild(conn);
+	let rt = await conn.execute(`create table type_test( a integer primary key, b nvarchar(2), c decimal(19,6), d float, e timestamp, f date, g time, h nclob, i blob)`);
+	expect(rt).toStrictEqual({});
+
+	let clob = "";
+	for(let i = 0;i<4096;i++) {
+		clob = clob + "数据"
+	}
+	const buffer = Buffer.from([8, 6, 7, 5, 3, 0, 9]);//Buffer.from("I'm a string!", 'utf-8');
+	const bufferString = buffer.toString();
+	rt = await conn.execute(
+		`insert into type_test(a, b, c, d, e, f, g, h, i) values(?,?,?,?,?,?,?,?,?)`,
+		[
+			1, '中文','1234567890123.456789', 1.7976931348623157E+308,
+			'1999-12-31T23:59:59.123','2000-01-31','23:59:59.999', clob, buffer
+		]);
+	expect(rt).toStrictEqual({affectedRows:1});
+
+	const result = await conn.execute(`select * from type_test`);
+	console.debug(result);
+	await conn.close();
+});

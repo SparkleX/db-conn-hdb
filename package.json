@@ -1,6 +1,6 @@
 {
   "name": "db-conn-hdb",
-  "version": "1.3.0",
+  "version": "1.3.2",
   "description": "Database Connecton and Pool implementation for SAP HANA hdb",
   "main": "dist/index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/SparkleX/db-conn-hdb#readme",
   "dependencies": {
-    "db-conn": "^1.3.0",
+    "db-conn": "^1.3.2",
     "hdb": "^0.18.1"
   },
   "keywords": [
